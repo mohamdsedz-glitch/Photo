@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>حياة جرش | المينيو الإلكتروني</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fbf5ee;--card:#fff;--ink:#3b0d14;--mut:#8a6a62;--gold:#a8741a;--acc:#6e1423;--line:#ead9c8;--on:#fff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#2a080e;--card:#3b0d14;--ink:#f6e7cf;--mut:#c9a99a;--gold:#e2b857;--acc:#e2b857;--line:#5a1b26;--on:#2a080e}}
+:root[data-theme="dark"]{--bg:#2a080e;--card:#3b0d14;--ink:#f6e7cf;--mut:#c9a99a;--gold:#e2b857;--acc:#e2b857;--line:#5a1b26;--on:#2a080e}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:0}
+body{background:var(--bg);color:var(--ink);font-family:Cairo,Tahoma,sans-serif;padding-bottom:30px}
+header{text-align:center;padding:26px 16px 8px}
+.logo{font:800 38px/1 Georgia,serif;color:var(--gold)}
+.brand{font-weight:800;font-size:20px;letter-spacing:1px}
+.sub{color:var(--mut);font-size:13px}
+.bar{display:flex;gap:8px;padding:8px 14px;align-items:center}
+#q{flex:1;min-width:0;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:20px;padding:8px 14px;font:inherit;font-size:14px;outline:0}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;gap:8px;overflow-x:auto;padding:8px 14px;border-bottom:1px solid var(--line);scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+nav button{flex:none;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:20px;padding:7px 14px;font:600 14px Cairo,sans-serif;cursor:pointer}
+nav button.on{background:var(--gold);color:var(--on);border-color:var(--gold)}
+main{padding:0 14px;max-width:720px;margin:auto}
+h2{margin:22px 0 4px;font-size:20px;color:var(--gold)}
+.note{color:var(--mut);font-size:12.5px;margin-bottom:6px}
+.item{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-top:8px}
+.pic{flex:none;width:84px;height:84px;border-radius:14px;border:1px solid var(--line);background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:30px;overflow:hidden}
+.pic{position:relative}
+.pic span{position:absolute}
+.pic img{position:relative;width:100%;height:100%;object-fit:cover;display:block;background:var(--card)}
+.info{flex:1;min-width:0}
+.nm{font-weight:600;font-size:15.5px}
+.ds{color:var(--mut);font-size:12.5px;line-height:1.5}
+.pr{color:var(--gold);font-weight:800;font-size:14.5px;margin-top:2px}
+.ask{font-size:12px;color:var(--mut)}
+.empty{text-align:center;color:var(--mut);padding:30px 0}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">H</div>
+  <div class="brand">HAYAT JERASH</div>
+  <div class="sub">كافيه ومطعم حياة جرش · اختر ما يحلو لك</div>
+</header>
+<div class="bar">
+  <input id="q" type="search" placeholder="ابحث في المينيو...">
+</div>
+<nav id="nav"></nav>
+<main id="menu"></main>
+
+<script>
+/* ===== الإعدادات ===== */
+const CUR='د.أ';
+/* صور المنتجات - الأولوية: 1) IMAGES (اسم الصنف ← رابط)  2) ملفك في مجلد img بالاسم fp-1.jpg (راجع images-list.txt)  3) الصورة الاحتياطية  4) أيقونة القسم */
+const IMAGES={};
+/* صور احتياطية من Unsplash (صور عامة وليست أطباقكم) تظهر فقط إذا لم توجد صورتك الخاصة. يلزم اتصال بالإنترنت. */
+const IMAGE_URLS={
+  breakfast:'https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=400&h=400&q=80',
+  bread:'https://images.unsplash.com/photo-1608198093002-ad4e005484df?auto=format&fit=crop&w=400&h=400&q=80',
+  sandwich:'https://images.unsplash.com/photo-1606755962773-d324e0a13086?auto=format&fit=crop&w=400&h=400&q=80',
+  burger:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=400&h=400&q=80',
+  chicken:'https://images.unsplash.com/photo-1606755962773-d324e0a13086?auto=format&fit=crop&w=400&h=400&q=80',
+  fries:'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=400&h=400&q=80',
+  coffee:'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=400&h=400&q=80',
+  tea:'https://images.unsplash.com/photo-1556679343-c7306c1976bc?auto=format&fit=crop&w=400&h=400&q=80',
+  frappe:'https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=400&h=400&q=80',
+  milkshake:'https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=400&h=400&q=80',
+  juice:'https://images.unsplash.com/photo-1546173159-315724a31696?auto=format&fit=crop&w=400&h=400&q=80',
+  cocktail:'https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=400&h=400&q=80',
+  mojito:'https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=400&h=400&q=80',
+  crepe:'https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?auto=format&fit=crop&w=400&h=400&q=80',
+  waffle:'https://images.unsplash.com/photo-1562376552-0d160a2f238d?auto=format&fit=crop&w=400&h=400&q=80',
+  dessert:'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=400&h=400&q=80'
+};
+function imageFor(name, category){
+  if(category==='sh'||category==='sd') return null;
+  const s=name.toLowerCase();
+  if(/زنجر|تشكن|دجاج|كرسبي|سكالوب/.test(s)) return IMAGE_URLS.chicken;
+  if(/برغر|برجر/.test(s)) return IMAGE_URLS.burger;
+  if(/بطاطا/.test(s)) return IMAGE_URLS.fries;
+  if(/منقوشة|زعتر|جبنة|حلوم|بيض|خبز|فلافل|حمص|متبل|أومليت|شكشوكة|فطور/.test(s)) return category==='bf'?IMAGE_URLS.breakfast:IMAGE_URLS.bread;
+  if(/شاي|يانسون|زهورات|بابونج|زنجبيل|كركديه|كمون|نسكافيه|كابتشينو|قهوة/.test(s)) return /قهوة|نسكافيه|كابتشينو/.test(s)?IMAGE_URLS.coffee:IMAGE_URLS.tea;
+  if(/فرابتشينو/.test(s)) return IMAGE_URLS.frappe;
+  if(/ميلك شيك/.test(s)) return IMAGE_URLS.milkshake;
+  if(/عصير|برتقال|ليمون|رمان|فراولة|مانجا|أناناس|كيوي/.test(s)) return IMAGE_URLS.juice;
+  if(/موهيتو/.test(s)) return IMAGE_URLS.mojito;
+  if(/كوكتيل/.test(s)) return IMAGE_URLS.cocktail;
+  if(/كريب|قوتشيني/.test(s)) return IMAGE_URLS.crepe;
+  if(/وافل/.test(s)) return IMAGE_URLS.waffle;
+  if(/سان سبستيان|ليزي كيك|آيسكريم|شوكولاتة|لوتس|بستاشيو|أوريو/.test(s)) return IMAGE_URLS.dessert;
+  if(/بيبسي|ميرندا|سفن|بوم بوم|كود رد|ريد بول|بربيكان|فيمتو/.test(s)) return IMAGE_URLS.cocktail;
+  if(category==='bf') return IMAGE_URLS.breakfast;
+  if(category==='mn') return IMAGE_URLS.bread;
+  if(category==='sw'||category==='ml') return IMAGE_URLS.sandwich;
+  if(category==='hd') return IMAGE_URLS.tea;
+  if(category==='fp') return IMAGE_URLS.frappe;
+  if(category==='ms') return IMAGE_URLS.milkshake;
+  if(category==='fj') return IMAGE_URLS.juice;
+  if(category==='ck'||category==='mj'||category==='sd') return IMAGE_URLS.cocktail;
+  if(category==='cp') return IMAGE_URLS.crepe;
+  if(category==='wf') return IMAGE_URLS.waffle;
+  if(category==='ds') return IMAGE_URLS.dessert;
+  return IMAGE_URLS.breakfast;
+}
+const P=(p,names,d)=>names.map(n=>[n,p,d]);
+const MENU=[
+{id:'bf',n:'الفطور',e:'🍳',note:'أومليت · حمص · متبل · فلافل · شكشوكة · منقوشة زعتر · منقوشة جبنة بيضاء · نبريكي · ابريق شاي',items:[
+ ['طبق فطور حياة جرش',7,'طبق فطور متكامل مع ابريق شاي'],
+ ['طبق فطور حياة جرش + أرجيلة',9,'نفس مكونات طبق الفطور مع أرجيلة من اختيارك']]},
+{id:'mn',n:'المناقيش',e:'🫓',items:[['منقوشة زعتر',1.5],['منقوشة جبنة بيضاء',1.5],['منقوشة بيض',1.5],['منقوشة بيض مع جبنة',2]]},
+{id:'sw',n:'الساندويشات',e:'🥪',items:[['زنجر',1.5],['تشكن كرسبي',1.5],['برغر',1],['سكالوب',1],['تبركي',1],['تبركي مع جبنة',1.5],['جبنة صفراء',1],['حلوم',1],['بطاطا',.75],['فلافل',.5]]},
+{id:'ml',n:'الوجبات',e:'🍟',items:[['وجبة زنجر',2.5,'مع بطاطا + كاتشب + مايونيز'],['وجبة برغر',2.5,'مع بطاطا + كاتشب + مايونيز'],['وجبة سكالوب',2,'مع بطاطا + كاتشب + مايونيز'],['وجبة تشكن كرسبي',2,'مع بطاطا + كاتشب + مايونيز'],['صحن بطاطا',1,'مع كاتشب + مايونيز']]},
+{id:'hd',n:'المشروبات الساخنة والأعشاب',e:'☕',items:[...P(1,['شاي','شاي كرك','شاي أخضر','زنجبيل وحليب','يانسون','زهورات شامية','بابونج','زنجبيل وعسل','كركديه','ليمون ونعنع ساخن','كمون وليمون']),['نسكافيه',1.5],['كابتشينو',1.5],['قهوة سنجل',1],['قهوة دبل',1.5]]},
+{id:'fp',n:'الفرابتشينو',e:'🥤',items:P(3.5,['فرابتشينو كراميل','فرابتشينو بستاشيو','فرابتشينو لوتس','فرابتشينو شوكولاتة','فرابتشينو أوريو','فرابتشينو توتيلا'])},
+{id:'ms',n:'الميلك شيك',e:'🍓',items:P(3.5,['ميلك شيك فراولة','ميلك شيك شوكولاتة','ميلك شيك فانيلا','ميلك شيك مانجا','ميلك شيك لوتس','ميلك شيك أوريو'])},
+{id:'fj',n:'العصائر الطبيعية',e:'🍊',items:[['برتقال',2],['برتقال مع ليمون',2],['ليمون',2],['ليمون مع نعنع',2.5],['رمان',2.5],['رمان مع نعنع',2.5],['رمان مع أناناس',2.5],['فراولة',2],['فراولة مع موز',2],['مانجا',2],['مانجا مع فراولة',2.5],['أناناس',2.5],['أناناس مع فراولة',2.5],['كيوي',2],['كيوي مع موز',2.5],['كيوي مع فراولة',2.5]]},
+{id:'ck',n:'الكوكتيلات الباردة',e:'🍹',items:[['رويال كوكتيل',3],['كوكتيل أفوكادو',3],['كوكتيل كلاسيك',2.5],['كوكتيل نوت مشكل',2.5],['كوكتيل ليمون',2.5],['كوكتيل فراولة',2.5],['كوكتيل مانجا',2.5],['كوكتيل بطيخ',2.5],['كوكتيل توت بري',2.5],['كوكتيل كيوي',2.5],['كوكتيل أفوكادو قشطة',3.5,'مع عسل ومكسرات']]},
+{id:'mj',n:'الموهيتو (كبير)',e:'🍋',items:[...P(2,['موهيتو كلاسيك','موهيتو توت','موهيتو باش فروت','موهيتو فراولة','موهيتو نوت بري','موهيتو بطيخ','موهيتو كيوي','موهيتو سبرز']),['موهيتو ريد بول',3.5]]},
+{id:'cp',n:'كريب وقوتشيني',e:'🥞',items:P(3,['كريب كلاسيك','كريب مكسر','كريب مكسر + آيسكريم','كريب لوتس','كريب بيستاشيو','قوتشيني كلاسيك','قوتشيني كلاس','قوتشيني مكسر + آيسكريم','قوتشيني لوتس','قوتشيني بستاشيو','قوتشيني فواكه'])},
+{id:'wf',n:'الوافل',e:'🧇',items:P(3,['وافل كلاسيك','وافل مكسر','وافل بلير مكسر + آيسكريم','وافل بلير لوتس','وافل بلير بستاشيو','وافل فواكه'])},
+{id:'sh',n:'الأراجيل',e:'💨',items:[['تفاحتين نخلة',3.5],['تفاحتين مزايا',3],...P(3,['بطيخ','ليمون','علكة','كاندي','بلو بيري','عنب','حب'])]},
+{id:'sd',n:'المشروبات الغازية والطاقة',e:'🥫',items:[['بيبسي',1],['ميرندا',1],['سفن أب',1],['بوم بوم',1.5],['كود رد',2],['ريد بول',2.5],['بربيكان',1.5],['فيمتو',1.25]]},
+{id:'ds',n:'الحلويات',e:'🍰',items:[['سان سبستيان',3],['ليزي كيك',null]]}
+];
+
+/* ترتيب الأقسام في القائمة */
+const ORDER=['hd','fp','ms','fj','ck','mj','sd','ds','sh','cp','wf','bf','mn','sw','ml'];
+MENU.sort((a,b)=>ORDER.indexOf(a.id)-ORDER.indexOf(b.id));
+const $=s=>document.querySelector(s), fmt=n=>n.toFixed(2)+' '+CUR;
+const top0=()=>parseFloat(getComputedStyle(document.documentElement).paddingTop)||0;
+
+function render(){
+  const term=$('#q').value.trim();let h='';
+  MENU.forEach(c=>{
+    const its=c.items.map((it,i)=>[it,i+1]).filter(([it])=>!term||it[0].includes(term)||c.n.includes(term));
+    if(!its.length)return;
+    h+=`<section id="${c.id}"><h2>${c.e} ${c.n}</h2>${c.note?`<div class="note">${c.note}</div>`:''}`;
+    its.forEach(([it,n])=>{
+      const src=IMAGES[it[0]]||`img/${c.id}-${n}.jpg`, stock=imageFor(it[0],c.id)||'';
+      h+=`<div class="item"><div class="pic"><img src="${src}" data-s="${stock}" alt="${it[0]}" loading="lazy" onerror="if(this.dataset.s){const u=this.dataset.s;this.dataset.s='';this.src=u}else this.remove()"></div>`+
+      `<div class="info"><div class="nm">${it[0]}</div>${it[2]?`<div class="ds">${it[2]}</div>`:''}`+
+      `<div class="pr">${it[1]==null?'<span class="ask">اسأل النادل عن السعر</span>':fmt(it[1])}</div></div></div>`;
+    });
+    h+='</section>';
+  });
+  $('#menu').innerHTML=h||'<div class="empty">لا توجد نتائج</div>';
+  curTab='';spy();
+}
+$('#q').addEventListener('input',render);
+
+$('#nav').innerHTML=MENU.map(c=>`<button data-c="${c.id}">${c.e} ${c.n}</button>`).join('');
+const navH=()=>$('#nav').offsetHeight;
+function goTo(id){const el=document.getElementById(id);if(!el)return;window.scrollTo({top:el.getBoundingClientRect().top+scrollY-navH()-top0()-4,behavior:'auto'})}
+$('#nav').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if($('#q').value){$('#q').value='';render()}goTo(b.dataset.c)});
+
+let curTab='';
+function spy(){
+  const line=navH()+top0()+30;let cur=null;
+  MENU.forEach(c=>{const el=document.getElementById(c.id);if(el&&el.getBoundingClientRect().top<=line)cur=c.id});
+  if(!cur){const f=document.querySelector('main section');cur=f?f.id:null}
+  if(cur===curTab)return;curTab=cur;
+  const nav=$('#nav');
+  document.querySelectorAll('#nav button').forEach(x=>{
+    const on=x.dataset.c===cur;x.classList.toggle('on',on);
+    if(on)nav.scrollLeft+=(x.getBoundingClientRect().left+x.offsetWidth/2)-(nav.getBoundingClientRect().left+nav.clientWidth/2);
+  });
+}
+addEventListener('scroll',spy,{passive:true});
+render();
+</script>
+</body>
+</html>
